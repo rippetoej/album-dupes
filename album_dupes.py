@@ -7,9 +7,6 @@ import pathlib
 # Silence non-critical errors to eliminate warnins about bad tags
 logging.getLogger("eyed3").setLevel(logging.CRITICAL)
 
-# Log important happenings to a default log file
-logging.basicConfig(filename='output.log', encoding='utf-8', filemode='w', level=logging.WARNING)
-
 
 logged_something = False
 
@@ -144,6 +141,7 @@ def init_argparse():
 	parser.add_argument("right_dir", nargs="?",
 			help="One of two directories to compare")
 	parser.add_argument('-A', '--use-album-artist', dest='use_album_artist', action='store_true', help="Use album artist as part of key instead of artist")
+	parser.add_argument('-l', '--log', dest='log_file', default='warnings.log', help="Logfile destination")
 	return parser
 
 
@@ -151,16 +149,21 @@ def main():
 	parser = init_argparse()
 	args = parser.parse_args()
 	
+	# Log important happenings to a logfile of the users choosing
+	logging.basicConfig(filename=args.log_file, encoding='utf-8', filemode='w', level=logging.WARNING)
+
+	# get the list of albums and their paths for each scan directory
 	left_albums = get_album_list(args.left_dir, args.use_album_artist)
 	right_albums = get_album_list(args.right_dir, args.use_album_artist)
 
+	# Now compare them suckers
 	if left_albums == type(None) or right_albums == type(None):
 		print("Oops, you had some errors I don't feel like dealing with")
 	else:
 		compare_albums(left_albums, right_albums)
 
 	if logged_something == True:
-		print("There were warnings which were written to the log file")
+		print("There were warnings which were written to " + args.log_file)
 
 
 if __name__ == "__main__":
