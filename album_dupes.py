@@ -61,15 +61,15 @@ def print_album(left_album, right_album):
 	#things won't run to the next line
 	term_width = os.get_terminal_size().columns
 	
-	left_keys = sorted(left_album.track_details.keys())
+	left_tracks = sorted(left_album.track_details.keys())
 	
-	# print each duplicate track in both columns
-	for key in left_keys:
-		left_column = left_album.get_track_string(key)
-		left_column = left_column.ljust(int(term_width/2))
-		if key in right_album.track_details:
-			right_column = left_album.get_track_string(key)
-			print(left_column, right_column)
+	# print each duplicate track in both columns, unmatched tracks in their respective columns	
+	for track_num in left_tracks:
+		left_track_str = left_album.get_track_string(track_num)
+		left_track_str = left_track_str.ljust(int(term_width/2))
+		if track_num in right_album.track_details:
+			right_track_str = right_album.get_track_string(track_num)
+			print(left_track_str, right_track_str)
 
 
 def get_album_list(path,):
