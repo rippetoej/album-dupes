@@ -23,6 +23,17 @@ class Album:
 				if f.lower().endswith(".mp3"):
 					mp3_path = os.path.join(root, f)
 					track_num, title, bit_rate_str, time_secs = get_track_details(mp3_path)
+					
+					# For files that don't have a track number, assign one with a high value
+					if track_num is None:
+						# do a quick search to make sure you don't reassign a track number 
+						# in case you have multiple unnumbered tracks
+						start_num = 9999
+						while start_num in self.track_details.keys():
+							start_num = start_num - 1
+
+						track_num = start_num
+
 					self.track_details[track_num] = (title, bit_rate_str, time_secs)
 					self.album, self.album_artist, self.track_count = get_album_info(mp3_path)
 
