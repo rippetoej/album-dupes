@@ -3,6 +3,7 @@ import eyed3
 import logging
 import os
 import pathlib
+import shutil
 
 # Silence non-critical errors to eliminate warnins about bad tags
 logging.getLogger("eyed3").setLevel(logging.CRITICAL)
@@ -32,6 +33,7 @@ class Album:
 
 					self.track_details[track_num] = (title, bit_rate_str, time_secs)
 					self.album, self.album_artist, self.track_count = get_album_info(mp3_path)
+					self.album_path = album_path
 
 
 	def get_track_string(self, track_num):
@@ -154,6 +156,19 @@ def get_album_list(path, use_album_artist):
 	else:
 		return None
 
+def move_album(album):
+	src = album.album_path
+	dst = os.path.join('backup', album.album_artist, album.album)
+	print(src)
+	print(dst)
+	while(True):
+		p = input("Are you sure? (y/n)")
+		if p.lower() == 'n':
+			break
+		elif p.lower() =='y':
+			shutil.copytree(src, dst)
+			break
+
 
 def compare_albums(left_albums, right_albums):
 	term_width = os.get_terminal_size().columns
@@ -183,7 +198,24 @@ def compare_albums(left_albums, right_albums):
 			print_album(left_album, right_album)
 			print("\n\n")
 
-
+			#Pause until user answers
+			should_quit = False;
+			while(True):
+				s = input("Continue (c) : quit (q) rm left (rl) : rm right (rr)  ")
+				if s.lower() == 'q':
+					should_quit = True
+					break
+				elif s.lower() == 'c':
+					break
+				elif s.lower() == 'rr':
+					move_album(right_album)
+					break
+				elif s.lower() == 'rl':
+					move_album(left_album)
+					break
+					
+			if should_quit:
+				break
 
 def init_argparse():
 	parser = argparse.ArgumentParser(description="Try to find and list duplicate tracks between two album directories")
