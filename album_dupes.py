@@ -7,6 +7,11 @@ import pathlib
 # Silence non-critical errors to eliminate warnins about bad tags
 logging.getLogger("eyed3").setLevel(logging.CRITICAL)
 
+# Log important happenings to a default log file
+logging.basicConfig(filename='output.log', encoding='utf-8', filemode='w', level=logging.WARNING)
+
+
+logged_something = False
 
 class Album:
 
@@ -72,16 +77,34 @@ def print_album(left_album, right_album):
 			print(left_track_str, right_track_str)
 
 
-def get_album_list(path,):
+def get_album_list(path, use_album_artist):
 	albums = dict()
 	for root, dirs, files in os.walk(path):
 		for f in files:
 			if f.lower().endswith(".mp3"):
 				mp3_tag = eyed3.load(os.path.join(root, f)).tag
-				albums[mp3_tag.album] = root
-				break
+				album = mp3_tag.album
+				
+				# sometimes, album artist is empty, but artist can also have a ton of names
+				# so let the user control this so they can at least compare runs with both
+				if use_album_artist:
+					artist = mp3_tag.album_artist
+				else:
+					artist = mp3_tag.artist
 
-	return albums
+				if type(album) == type(None) or type(artist) == type(None):
+					logging.warning("Album or Artist tags are empty for " + os.path.join(root, f))
+					global logged_something
+					logged_something = True
+				else:
+					key = album.lower().replace(" ","") + artist.lower().replace(" ","")
+					albums[key] = root
+					break
+
+	if len(albums.keys()) > 0:
+		return albums
+	else:
+		return None
 
 
 def compare_albums(left_albums, right_albums):
@@ -120,6 +143,7 @@ def init_argparse():
 			help="One of two directories to compare")
 	parser.add_argument("right_dir", nargs="?",
 			help="One of two directories to compare")
+	parser.add_argument('-A', '--use-album-artist', dest='use_album_artist', action='store_true', help="Use album artist as part of key instead of artist")
 	return parser
 
 
@@ -127,10 +151,16 @@ def main():
 	parser = init_argparse()
 	args = parser.parse_args()
 	
-	left_albums = get_album_list(args.left_dir)
-	right_albums = get_album_list(args.right_dir)
+	left_albums = get_album_list(args.left_dir, args.use_album_artist)
+	right_albums = get_album_list(args.right_dir, args.use_album_artist)
 
-	compare_albums(left_albums, right_albums)
+	if left_albums == type(None) or right_albums == type(None):
+		print("Oops, you had some errors I don't feel like dealing with")
+	else:
+		compare_albums(left_albums, right_albums)
+
+	if logged_something == True:
+		print("There were warnings which were written to the log file")
 
 
 if __name__ == "__main__":
