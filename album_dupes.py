@@ -118,7 +118,12 @@ def get_album_list(path,):
 def compare_albums(left_albums, right_albums):
 	term_width = os.get_terminal_size().columns
 
+	left_album_total = len(left_albums.keys())
+	left_album_count = 0
+
 	for album_key in left_albums:
+		left_album_count = left_album_count + 1
+
 		if album_key in right_albums:
 			
 			#build dicts with track details
@@ -128,6 +133,8 @@ def compare_albums(left_albums, right_albums):
 			#print header
 			str = ""
 			print(str.ljust(term_width, '='))
+			print("%d/%d" % (left_album_count, left_album_total))
+
 			left_path = ("%s" % left_albums[album_key]).center(int(term_width/2))
 			right_path = ("%s" % right_albums[album_key]).center(int(term_width/2))
 			print(left_path, right_path)
