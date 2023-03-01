@@ -35,12 +35,16 @@ class Album:
 
 
 	def get_track_string(self, track_num):
-		title, bit_rate_str, length = self.track_details[track_num]
 
-		len_m = int(length/60)
-		len_s = length % 60
+		if track_num is not None:
+			title, bit_rate_str, length = self.track_details[track_num]
 
-		return "[%s] - %2d:%02d (%s) %s" % (bit_rate_str, len_m, len_s, track_num, title)
+			len_m = int(length/60)
+			len_s = length % 60
+
+			return "[%s] - %2d:%02d (%2d) %s" % (bit_rate_str, len_m, len_s, int(track_num), title)
+		else:
+			return "[  ----  ] - xx:xx (--) ---------------------"
 
 
 
@@ -64,14 +68,61 @@ def print_album(left_album, right_album):
 	term_width = os.get_terminal_size().columns
 	
 	left_tracks = sorted(left_album.track_details.keys())
+	right_tracks = sorted(right_album.track_details.keys())
 	
-	# print each duplicate track in both columns, unmatched tracks in their respective columns	
-	for track_num in left_tracks:
-		left_track_str = left_album.get_track_string(track_num)
+	left_idx = 0
+	right_idx = 0
+
+	# Print tracks until one side is done
+	while(left_idx < len(left_tracks) and right_idx < len(right_tracks)):
+
+		left_track_str = ''
+		right_track_str = ''
+
+		left_track_num = left_tracks[left_idx]
+		right_track_num = right_tracks[right_idx]
+
+		if(left_track_num == right_track_num):
+			# Print both
+			left_track_str = left_album.get_track_string(left_track_num)
+			left_track_str = left_track_str.ljust(int(term_width/2))
+			right_track_str = right_album.get_track_string(right_track_num)
+			left_idx += 1
+			right_idx += 1
+		
+		elif left_track_num < right_track_num:
+			# Only print left track
+			left_track_str = left_album.get_track_string(left_track_num)
+			left_track_str = left_track_str.ljust(int(term_width/2))
+			right_track_str = right_album.get_track_string(None)
+			left_idx += 1
+
+		else:
+			#only print right track
+			left_track_str = left_album.get_track_string(None)
+			left_track_str = left_track_str.ljust(int(term_width/2))
+			right_track_str = right_album.get_track_string(right_track_num)
+			right_idx += 1
+
+		print(left_track_str, right_track_str)
+
+	# Print remaining left tracks (if any)
+	while left_idx < len(left_tracks):
+		left_track_num = left_tracks[left_idx]
+		left_track_str = left_album.get_track_string(left_track_num)
 		left_track_str = left_track_str.ljust(int(term_width/2))
-		if track_num in right_album.track_details:
-			right_track_str = right_album.get_track_string(track_num)
-			print(left_track_str, right_track_str)
+		right_track_str = right_album.get_track_string(None)
+		left_idx += 1
+		print(left_track_str, right_track_str)
+
+	# Print remaining right tracks (if any)
+	while right_idx < len(right_tracks):
+		right_track_num = right_tracks[right_idx]
+		left_track_str = left_album.get_track_string(None)
+		left_track_str = ''.ljust(int(term_width/2))
+		right_track_str = right_album.get_track_string(right_track_num)
+		right_idx += 1
+		print(left_track_str, right_track_str)
 
 
 def get_album_list(path, use_album_artist):
@@ -128,7 +179,7 @@ def compare_albums(left_albums, right_albums):
 			right_path = ("%s" % right_albums[album_key]).center(int(term_width/2))
 			print(left_path, right_path)
 
-			#print track details
+			#print album details
 			print_album(left_album, right_album)
 			print("\n\n")
 
