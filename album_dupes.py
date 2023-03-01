@@ -1,5 +1,6 @@
 import argparse
 import eyed3
+import logging
 import os
 import pathlib
 
@@ -9,6 +10,9 @@ import pathlib
 # walk right directory and check  against albums in left dir
 # if there is a match read in all tracks and store them in a dict, keyed by track number for both left and right
 #
+
+logging.getLogger("eyed3").setLevel(logging.CRITICAL)
+
 
 
 class Album:
