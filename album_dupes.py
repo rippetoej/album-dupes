@@ -15,6 +15,7 @@ class Album:
 
 	def __init__(self, album_path):
 		self.track_details = dict()
+		self.track_count = 0
 		for root, dirs, files in os.walk(album_path):
 			for f in files:
 				if f.lower().endswith(".mp3"):
@@ -32,7 +33,8 @@ class Album:
 						track_num = start_num
 
 					self.track_details[track_num] = (title, bit_rate_str, time_secs)
-					self.album, self.album_artist, self.track_count = get_album_info(mp3_path)
+					self.album, self.album_artist = get_album_info(mp3_path)
+					self.track_count += 1
 					self.album_path = album_path
 
 
@@ -60,8 +62,7 @@ def get_track_details(audio_file_path):
 
 def get_album_info(audio_file_path):
 	tag = eyed3.load(audio_file_path).tag
-	track_num, track_count = tag.track_num
-	return(tag.album, tag.album_artist, track_count)
+	return(tag.album, tag.album_artist)
 
 
 def print_album(left_album, right_album):
