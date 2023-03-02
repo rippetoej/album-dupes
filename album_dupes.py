@@ -1,5 +1,6 @@
 import argparse
 import eyed3
+import glob
 import logging
 import os
 import pathlib
@@ -198,6 +199,23 @@ def compare_albums(left_albums, right_albums, backup_dir):
 			left_path = ("%s" % left_albums[album_key]).center(int(term_width/2))
 			right_path = ("%s" % right_albums[album_key]).center(int(term_width/2))
 			print(left_path, right_path)
+
+			# Print number of globbed mp3 files alongside album track count to catch extra filse
+			# I'm only going to concern myself with mp3 files for now since I've done some basic
+			# manual checks for other audio types (wma and wav) and don't care about cover art files
+			left_mp3_count = len(glob.glob('*.mp3',root_dir=left_album.album_path))
+			right_mp3_count = len(glob.glob('*.mp3', root_dir=right_album.album_path))
+
+			left_count_str = "[%2d/%2d]" % (left_mp3_count, left_album.track_count)
+			right_count_str = "[%2d/%2d]" % (right_mp3_count, right_album.track_count)
+
+			if left_mp3_count != left_album.track_count:
+				left_count_str = left_count_str +  "  <-- !! COUNT MISMATCH !!"
+
+			if right_mp3_count != right_album.track_count:
+				right_count_str = right_count_str +  "  <-- !! COUNT MISMATCH !!"
+
+			print(left_count_str.center(int(term_width/2)), right_count_str.center(int(term_width/2)))
 
 			#print album details
 			print_album(left_album, right_album)
