@@ -148,7 +148,11 @@ def get_album_list(path, use_album_artist):
 					logged_something = True
 				else:
 					key = album.lower().replace(" ","") + artist.lower().replace(" ","")
-					albums[key] = root
+					if key not in albums:
+						albums[key] = root
+					else:
+						logging.critical(os.path.join(root,f))
+						logging.critical("An album already exists with key " + key)
 					break
 
 	if len(albums.keys()) > 0:
