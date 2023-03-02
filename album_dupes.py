@@ -160,21 +160,21 @@ def get_album_list(path, use_album_artist):
 	else:
 		return None
 
-def move_album(album):
+def move_album(album, backup_dir):
 	src = album.album_path
-	dst = os.path.join('backup', album.album_artist, album.album)
+	dst = os.path.join(backup_dir, album.album_artist, album.album)
 	print(src)
 	print(dst)
 	while(True):
 		p = input("Are you sure? (y/n)")
 		if p.lower() == 'n':
-			break
+			return False
 		elif p.lower() =='y':
-			shutil.copytree(src, dst)
-			break
+			shutil.move(src, dst)
+			return True
 
 
-def compare_albums(left_albums, right_albums):
+def compare_albums(left_albums, right_albums, backup_dir):
 	term_width = os.get_terminal_size().columns
 
 	left_album_total = len(left_albums.keys())
@@ -212,11 +212,11 @@ def compare_albums(left_albums, right_albums):
 				elif s.lower() == 'c':
 					break
 				elif s.lower() == 'rr':
-					move_album(right_album)
-					break
+					if move_album(right_album, backup_dir):
+						break
 				elif s.lower() == 'rl':
-					move_album(left_album)
-					break
+					if move_album(left_album, backup_dir):
+						break
 					
 			if should_quit:
 				break
@@ -229,6 +229,7 @@ def init_argparse():
 			help="One of two directories to compare")
 	parser.add_argument('-A', '--use-album-artist', dest='use_album_artist', action='store_true', help="Use album artist as part of key instead of artist")
 	parser.add_argument('-l', '--log', dest='log_file', default='warnings.log', help="Logfile destination")
+	parser.add_argument('-b', '--backup-dir', dest='backup_dir', default='dupes_backup', help="Backup destination")
 	return parser
 
 
@@ -247,7 +248,7 @@ def main():
 	if left_albums == type(None) or right_albums == type(None):
 		print("Oops, you had some errors I don't feel like dealing with")
 	else:
-		compare_albums(left_albums, right_albums)
+		compare_albums(left_albums, right_albums, args.backup_dir)
 
 	if logged_something == True:
 		print("There were warnings which were written to " + args.log_file)
