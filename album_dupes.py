@@ -122,7 +122,7 @@ def print_album(left_album, right_album):
 	while right_idx < len(right_tracks):
 		right_track_num = right_tracks[right_idx]
 		left_track_str = left_album.get_track_string(None)
-		left_track_str = ''.ljust(int(term_width/2))
+		left_track_str = left_track_str.ljust(int(term_width/2))
 		right_track_str = right_album.get_track_string(right_track_num)
 		right_idx += 1
 		print(left_track_str, right_track_str)
