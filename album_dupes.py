@@ -1,10 +1,13 @@
 import argparse
+import datetime
 import eyed3
 import glob
 import logging
 import os
 import pathlib
 import shutil
+
+from datetime import datetime
 
 # Silence non-critical errors to eliminate warnins about bad tags
 logging.getLogger("eyed3").setLevel(logging.CRITICAL)
@@ -173,6 +176,7 @@ def move_album(album, backup_dir):
 			return False
 		elif p.lower() =='y':
 			shutil.move(src, dst)
+			logging.info("Moved " + src + " to " + dst)
 			return True
 
 
@@ -257,7 +261,12 @@ def main():
 	args = parser.parse_args()
 	
 	# Log important happenings to a logfile of the users choosing
-	logging.basicConfig(filename=args.log_file, encoding='utf-8', filemode='w', level=logging.WARNING)
+	logging.basicConfig(filename=args.log_file, encoding='utf-8', level=logging.INFO)
+
+	# Timestamp start of log with current date and time
+	now = datetime.now()
+	date_time = now.strftime("%m/%d/%Y, %H:%M:%S")
+	logging.info(f"\n=============  {date_time}  =============" )
 
 	# get the list of albums and their paths for each scan directory
 	left_albums = get_album_list(args.left_dir, args.use_album_artist)
