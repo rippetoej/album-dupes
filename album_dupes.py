@@ -166,8 +166,12 @@ def get_album_list(path, use_album_artist):
 		return None
 
 def move_album(album, backup_dir):
+
 	src = album.album_path
-	dst = os.path.join(backup_dir, album.album_artist, album.album)
+	path_base, src_album = os.path.split(src)
+	src_artist = os.path.basename(path_base)
+	dst = os.path.join(backup_dir, src_artist, src_album)
+
 	print(src)
 	print(dst)
 	while(True):
